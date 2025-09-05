@@ -5,25 +5,32 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../store/authStore';
 import { Lock, Mail, MailCheck } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(false);
   const router = useRouter();
   const login = useAuthStore((state) => state.login);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real application, you would send a request to your backend for authentication.
-    // For this example, we'll simulate a successful login with a dummy token.
-    const dummyToken = 'your-jwt-token-here'; 
-    login(dummyToken, rememberMe);
-    router.push('/');
+    console.log("submitted", email, password);
+    console.log("Yessssss");
+    
+    try {
+      // In a real application, you would send a request to your backend for authentication.
+      // For this example, we'll simulate a successful login with a dummy token.
+      // const dummyToken = 'your-jwt-token-here'; 
+      await login({ email, password }); // ✅ استنى تسجيل الدخول
+      router.push('/'); // ✅ بعد النجاح
+    } catch (error) {
+      console.error("Login failed:", error);
+    }
   };
-
+  
  return (
-    <div className="min-h-screen bg-[#E9ECF2] flex">
+    <div className="min-h-screen bg-[#E9ECF2] flex overflow-hidden">
       {/* Left Side - Form */}
       <div className="flex flex-col justify-center items-center w-2/5 bg-gradient-to-b from-white to-purple-100 p-10 border-r border-purple-300">
         <div className="w-full text-center max-w-sm space-y-9">
@@ -45,7 +52,7 @@ const LoginPage = () => {
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full pl-12 pr-4 py-4 border border-white bg-[#FFFFFF66] rounded-lg focus:ring-2 outline-none placeholder:text-[#62626B] text-base"
+              className="w-full pl-12 pr-4 text-black py-4 border border-white bg-[#FFFFFF66] rounded-lg focus:ring-2 outline-none placeholder:text-[#62626B] text-base"
               
             />
           </div>
@@ -58,29 +65,48 @@ const LoginPage = () => {
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full pl-12 pr-4 py-4 border border-white bg-[#FFFFFF66] rounded-lg focus:ring-2 outline-none placeholder:text-[#62626B] text-base"
+              className="w-full pl-12 pr-4 text-black py-4 border border-white bg-[#FFFFFF66] rounded-lg focus:ring-2 outline-none placeholder:text-[#62626B] text-base"
             />
           </div>
 
-          </form>
-          
           {/* Login Button */}
           <button
-            className="w-full bg-[#9414FF] hover:bg-purple-700 cursor-pointer text-white py-2 rounded-lg transition disabled:opacity-50"
+          type='submit'
+            className="w-full mt-4 bg-[#9414FF] hover:bg-purple-700 cursor-pointer text-white py-2 rounded-lg transition disabled:opacity-50"
             disabled={!email || !password}
           >
             Login
           </button>
+          </form>
+          
 
           <p className="text-center text-sm text-gray-500">
-            Don’t have an account? Sign up
+            Don’t have an account? <Link href="/signup" className="text-purple-700">Sign up</Link>
           </p>
         </div>
       </div>
 
       {/* Right Side - Logo */}
       <div className="flex flex-col justify-center items-center w-3/5 bg-gradient-to-b from-purple-100 to-purple-200">
-
+        <div className="relative w-full h-1/2">
+        <Image 
+                  src="/9e4298a54af78a8be9b2851a140ca8232f42ded4.png" 
+                  alt="image" 
+                  width={600} 
+                  height={288} 
+                  className=' object-cover absolute inset-0 m-auto -rotate-20'
+        />
+        <Image 
+          src="/b74714317592c3c8176c99baddf62febe0e276d0.png" 
+          alt="image" 
+          width={700} 
+          height={700} 
+          className=' object-cover absolute inset-0 m-auto scale-200 -rotate-20'
+          />
+        </div>
+        <div className="w-full h-1/4 flex items-start justify-center">
+        <Image src="/9039681aa3afd99677ad4b38d7a998cc976b0092.png" alt='text image' width={413} height={75}/>
+        </div>
       </div>
     </div>
   );

@@ -1,32 +1,48 @@
 import { create } from 'zustand';
 import Cookies from 'js-cookie';
-import { useEffect } from 'react';
+import axios from 'axios';
+
+type Data = {
+  email: string;
+  password: string;
+};
 
 interface AuthState {
   token: string | null;
   setToken: (token: string | null) => void;
-  login: (token: string, rememberMe: boolean) => void;
+  login: (data: Data) => Promise<void>;
   logout: () => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
-  token: null, // Initialize as null on server
+  token: null,
   setToken: (token) => set({ token }),
-  login: (token, rememberMe) => {
-    set({ token });
-    if (rememberMe) {
-      Cookies.set('token', token, { expires: 7 }); // Expires in 7 days
-    } else {
-      Cookies.set('token', token); // Session cookie
+  
+  login: async (data) => {
+    try {
+      const res = await axios.post('https://api-yeshtery.dev.meetusvr.com/v1/yeshtery/token', {
+        ...data,
+        isEmployee: true,
+      });
+
+      console.log('====================================');
+      console.log(res.data);
+      console.log('====================================');
+
+      set({ token: res.data.token });
+      Cookies.set('token', res.data.token, { expires: 7 });
+    } catch (error) {
+      console.error('An error occurred while logging in:', error);
     }
   },
+
   logout: () => {
     set({ token: null });
     Cookies.remove('token');
   },
 }));
 
-// Client-side hydration of the token
+// Hydrate token from cookies on client
 if (typeof window !== 'undefined') {
   const tokenFromCookie = Cookies.get('token');
   if (tokenFromCookie) {
