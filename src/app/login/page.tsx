@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../store/authStore';
+import { Lock, Mail, MailCheck } from 'lucide-react';
+import Image from 'next/image';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -20,58 +22,65 @@ const LoginPage = () => {
     router.push('/');
   };
 
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100">
-      <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-md">
-        <h2 className="mb-6 text-center text-3xl font-bold text-gray-900">Login</h2>
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label htmlFor="email" className="mb-2 block text-sm font-medium text-gray-700">
-              Email
-            </label>
+ return (
+    <div className="min-h-screen bg-[#E9ECF2] flex">
+      {/* Left Side - Form */}
+      <div className="flex flex-col justify-center items-center w-2/5 bg-gradient-to-b from-white to-purple-100 p-10 border-r border-purple-300">
+        <div className="w-full text-center max-w-sm space-y-9">
+          <div className="">
+          <h1 className="text-[56px] text-black leading-[120%] mb-2">Welcome back</h1>
+          <p className="text-gray-500 text-lg leading-[155%]">
+            Step into our shopping metaverse for an unforgettable shopping
+            experience
+          </p>
+          </div>
+            
+          <form onSubmit={handleSubmit} className='space-y-5'>
+
+          {/* Email Input */}
+          <div className="relative">
+            <MailCheck className="absolute left-4 top-1/2 -translate-y-1/2 text-[#1A1A1E]" />
             <input
               type="email"
-              id="email"
-              className="focus:shadow-outline w-full rounded-md border p-3 focus:outline-none"
-              placeholder="Enter your email"
+              placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              required
+              className="w-full pl-12 pr-4 py-4 border border-white bg-[#FFFFFF66] rounded-lg focus:ring-2 outline-none placeholder:text-[#62626B] text-base"
+              
             />
           </div>
-          <div className="mb-4">
-            <label htmlFor="password" className="mb-2 block text-sm font-medium text-gray-700">
-              Password
-            </label>
+
+          {/* Password Input */}
+          <div className="relative">
+            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-[#1A1A1E]" />
             <input
               type="password"
-              id="password"
-              className="focus:shadow-outline w-full rounded-md border p-3 focus:outline-none"
-              placeholder="Enter your password"
+              placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              required
+              className="w-full pl-12 pr-4 py-4 border border-white bg-[#FFFFFF66] rounded-lg focus:ring-2 outline-none placeholder:text-[#62626B] text-base"
             />
           </div>
-          <div className="mb-4 flex items-center">
-            <input
-              type="checkbox"
-              id="rememberMe"
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500"
-              checked={rememberMe}
-              onChange={(e) => setRememberMe(e.target.checked)}
-            />
-            <label htmlFor="rememberMe" className="ml-2 block text-sm text-gray-900">
-              Remember me
-            </label>
-          </div>
+
+          </form>
+          
+          {/* Login Button */}
           <button
-            type="submit"
-            className="focus:shadow-outline w-full rounded-md bg-blue-600 px-4 py-3 text-white hover:bg-blue-700 focus:outline-none"
+            className="w-full bg-[#9414FF] hover:bg-purple-700 cursor-pointer text-white py-2 rounded-lg transition disabled:opacity-50"
+            disabled={!email || !password}
           >
-            Sign In
+            Login
           </button>
-        </form>
+
+          <p className="text-center text-sm text-gray-500">
+            Don’t have an account? Sign up
+          </p>
+        </div>
+      </div>
+
+      {/* Right Side - Logo */}
+      <div className="flex flex-col justify-center items-center w-3/5 bg-gradient-to-b from-purple-100 to-purple-200">
+
       </div>
     </div>
   );
