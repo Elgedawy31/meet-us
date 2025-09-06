@@ -31,25 +31,25 @@ const DashboardPage = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-100 to-indigo-200 p-6 animate-gradient-shift">
-      <div className="bg-white bg-opacity-90 backdrop-blur-sm shadow-2xl rounded-2xl p-12 max-w-xl w-full text-gray-800 animate-fade-in border border-gray-200">
-        <h1 className="text-5xl font-extrabold mb-10 text-center text-indigo-600 animate-slide-down">
+      <div className="bg-white/70 backdrop-blur-md shadow-2xl rounded-2xl p-10 max-w-xl w-full text-gray-800 animate-fade-in border border-gray-100">
+        <h1 className="text-4xl font-extrabold mb-8 text-center text-indigo-700 animate-slide-down">
           Welcome, <span className="text-gray-900">{userInfo.name}!</span>
         </h1>
         
-        <div className="space-y-8 mb-10 animate-fade-in delay-200 text-left w-full">
-          <div className="flex items-center space-x-4">
-            <User className="text-indigo-500" size={24} />
-            <div>
-              <p className="text-sm font-medium text-gray-500">User ID</p>
-              <p className="text-2xl font-bold text-gray-800 leading-tight">{userInfo.id}</p>
+        <div className="space-y-6 mb-8 animate-fade-in delay-200 text-left w-full">
+          <div className="flex flex-col">
+            <div className="flex items-center space-x-2 text-sm font-medium text-gray-500 mb-1">
+              <User size={18} />
+              <span>User ID</span>
             </div>
+            <p className="text-2xl font-bold text-gray-800 leading-tight pl-6">{userInfo.id}</p>
           </div>
-          <div className="flex items-center space-x-4">
-            <Mail className="text-indigo-500" size={24} />
-            <div>
-              <p className="text-sm font-medium text-gray-500">Email Address</p>
-              <p className="text-2xl font-bold text-gray-800 leading-tight">{userInfo.email}</p>
+          <div className="flex flex-col">
+            <div className="flex items-center space-x-2 text-sm font-medium text-gray-500 mb-1">
+              <Mail size={18} />
+              <span>Email Address</span>
             </div>
+            <p className="text-2xl font-bold text-gray-800 leading-tight pl-6">{userInfo.email}</p>
           </div>
         </div>
 

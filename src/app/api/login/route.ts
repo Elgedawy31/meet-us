@@ -35,9 +35,14 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json({ success: true, userInfo });
-  } catch (error: any) {
-    const status = error.response?.status || 500;
-    const message = error.response?.data?.message || 'Login failed';
+  } catch (error: unknown) {
+    let status = 500;
+    let message = 'Login failed';
+
+    if (axios.isAxiosError(error) && error.response) {
+      status = error.response.status;
+      message = error.response.data?.message || message;
+    }
     return NextResponse.json({ success: false, message }, { status });
   }
 }
