@@ -1,24 +1,53 @@
 import { create } from 'zustand';
 import Cookies from 'js-cookie';
 import axios from 'axios';
+import { toast } from 'react-hot-toast';
 
 type Data = {
   email: string;
   password: string;
 };
 
+interface UserInfo {
+  id: number;
+  name: string;
+  email: string;
+  roles: string[];
+  imageUrl: string | null;
+  organizationId: number;
+  isEmployee: boolean;
+  shopId: number;
+}
+
 interface AuthState {
   token: string | null;
+  refreshToken: string | null;
+  userInfo: UserInfo | null; // Define a more specific type if possible
+  loading: boolean;
+  error: string | null;
   setToken: (token: string | null) => void;
+  setRefreshToken: (refreshToken: string | null) => void;
+  setUserInfo: (userInfo: UserInfo | null) => void;
+  setLoading: (loading: boolean) => void;
+  setError: (error: string | null) => void;
   login: (data: Data) => Promise<void>;
   logout: () => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
   token: null,
+  refreshToken: null,
+  userInfo: null,
+  loading: false,
+  error: null,
   setToken: (token) => set({ token }),
+  setRefreshToken: (refreshToken) => set({ refreshToken }),
+  setUserInfo: (userInfo) => set({ userInfo }),
+  setLoading: (loading) => set({ loading }),
+  setError: (error) => set({ error }),
   
   login: async (data) => {
+    set({ loading: true, error: null });
     try {
       const res = await axios.post('https://api-yeshtery.dev.meetusvr.com/v1/yeshtery/token', {
         ...data,
@@ -27,23 +56,54 @@ export const useAuthStore = create<AuthState>((set) => ({
 
       console.log(res.data);
 
-      set({ token: res.data.token });
+      set({
+        token: res.data.token,
+        refreshToken: res.data.refresh,
+        userInfo: res.data.userInfo as UserInfo,
+      });
       Cookies.set('token', res.data.token, { expires: 7 });
-    } catch (error) {
+      Cookies.set('refresh', res.data.refresh, { expires: 30 }); // Refresh token typically has a longer expiry
+      localStorage.setItem('userInfo', JSON.stringify(res.data.userInfo));
+      toast.success('Login successful!');
+    } catch (error: unknown) {
       console.error('An error occurred while logging in:', error);
+      let errorMessage = 'Login failed. Please try again.';
+      if (axios.isAxiosError(error) && error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      }
+      set({ error: errorMessage });
+      toast.error(errorMessage);
+      throw error; // Re-throw the error so the component can catch it
+    } finally {
+      set({ loading: false });
     }
   },
 
   logout: () => {
-    set({ token: null });
+    set({ token: null, refreshToken: null, userInfo: null });
     Cookies.remove('token');
+    Cookies.remove('refresh');
+    localStorage.removeItem('userInfo');
+    toast.success('Logged out successfully!');
   },
 }));
 
-// Hydrate token from cookies on client
+// Hydrate token and userInfo from cookies/localStorage on client
 if (typeof window !== 'undefined') {
   const tokenFromCookie = Cookies.get('token');
+  const refreshTokenFromCookie = Cookies.get('refresh');
+  const userInfoFromLocalStorage = localStorage.getItem('userInfo');
+
+  const initialState: Partial<AuthState> = {};
+
   if (tokenFromCookie) {
-    useAuthStore.setState({ token: tokenFromCookie });
+    initialState.token = tokenFromCookie;
   }
+  if (refreshTokenFromCookie) {
+    initialState.refreshToken = refreshTokenFromCookie;
+  }
+  if (userInfoFromLocalStorage) {
+    initialState.userInfo = JSON.parse(userInfoFromLocalStorage) as UserInfo;
+  }
+  useAuthStore.setState(initialState);
 }
