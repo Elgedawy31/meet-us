@@ -51,54 +51,22 @@ export const useAuthStore = create<AuthState>((set) => ({
   login: async (data) => {
     set({ loading: true, error: null });
     try {
-      const res = await axios.post('https://api-yeshtery.dev.meetusvr.com/v1/yeshtery/token', {
-        ...data,
-        isEmployee: true,
-      });
-
-      console.log(res.data);
-
-      set({
-        token: res.data.token,
-        refreshToken: res.data.refresh,
-        userInfo: res.data.userInfo as UserInfo,
-      });
-      Cookies.set('token', res.data.token, { expires: 7 });
-      Cookies.set('refresh', res.data.refresh, { expires: 30 }); // Refresh token typically has a longer expiry
-      localStorage.setItem('userInfo', JSON.stringify(res.data.userInfo));
-
-      // Fetch user info
-      try {
-        const userInfoRes = await axios.get('https://api-yeshtery.dev.meetusvr.com/v1/user/info', {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${res.data.token}`,
-          },
-        });
-        set({ userInfo: userInfoRes.data as UserInfo });
-        localStorage.setItem('userInfo', JSON.stringify(userInfoRes.data));
-      } catch (userInfoError: unknown) {
-        console.error('An error occurred while fetching user info:', userInfoError);
-        let userInfoErrorMessage = 'Failed to fetch user information.';
-        if (axios.isAxiosError(userInfoError) && userInfoError.response?.data?.message) {
-          userInfoErrorMessage = userInfoError.response.data.message;
-        }
-        set({ error: userInfoErrorMessage });
-        toast.error(userInfoErrorMessage);
-        // Clear tokens and user info if fetching user info fails
-        Cookies.remove('token');
-        Cookies.remove('refresh');
-        localStorage.removeItem('userInfo');
-        set({ token: null, refreshToken: null, userInfo: null });
-        throw userInfoError; // Re-throw to propagate the error
+      const res = await axios.post('/api/login', data);
+  
+      if (res.data.success) {
+        const { userInfo } = res.data;
+        set({ userInfo });
+        toast.success('Login successful!');
+      } else {
+        throw new Error(res.data.message || 'Login failed');
       }
-      
-      toast.success('Login successful!');
     } catch (error: unknown) {
       console.error('An error occurred while logging in:', error);
       let errorMessage = 'Login failed. Please try again.';
       if (axios.isAxiosError(error) && error.response?.data?.message) {
         errorMessage = error.response.data.message;
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
       }
       set({ error: errorMessage });
       toast.error(errorMessage);
@@ -107,33 +75,45 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({ loading: false });
     }
   },
-
-  logout: () => {
-    set({ token: null, refreshToken: null, userInfo: null });
-    Cookies.remove('token');
-    Cookies.remove('refresh');
-    localStorage.removeItem('userInfo');
-    toast.success('Logged out successfully!');
+  
+  logout: async () => {
+    set({ loading: true, error: null });
+    try {
+      await axios.post('/api/logout');
+      set({ token: null, refreshToken: null, userInfo: null });
+      toast.success('Logged out successfully!');
+    } catch (error: unknown) {
+      console.error('An error occurred during logout:', error);
+      let errorMessage = 'Logout failed. Please try again.';
+      if (axios.isAxiosError(error) && error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      set({ error: errorMessage });
+      toast.error(errorMessage);
+    } finally {
+      set({ loading: false });
+    }
   },
 }));
-
-// Hydrate token and userInfo from cookies/localStorage on client
-if (typeof window !== 'undefined') {
-  const tokenFromCookie = Cookies.get('token');
-  const refreshTokenFromCookie = Cookies.get('refresh');
-  const userInfoFromLocalStorage = localStorage.getItem('userInfo');
-
-  const initialState: Partial<AuthState> = {};
-
-  if (tokenFromCookie) {
-    initialState.token = tokenFromCookie;
+  
+  // Hydrate token and userInfo from cookies/localStorage on client
+  if (typeof window !== 'undefined') {
+    // Remove old cookie/localStorage hydration logic as tokens are now http-only
+    // Initial authentication check will be handled by a server-side component or a client-side fetch to /api/user-info
+    const initializeAuth = async () => {
+      try {
+        const res = await axios.get('/api/user-info');
+        if (res.data.success) {
+          useAuthStore.setState({ userInfo: res.data.userInfo, _hasHydrated: true });
+        } else {
+          useAuthStore.setState({ _hasHydrated: true });
+        }
+      } catch (error) {
+        console.error('Failed to fetch user info during hydration:', error);
+        useAuthStore.setState({ _hasHydrated: true });
+      }
+    };
+    initializeAuth();
   }
-  if (refreshTokenFromCookie) {
-    initialState.refreshToken = refreshTokenFromCookie;
-  }
-  if (userInfoFromLocalStorage) {
-    initialState.userInfo = JSON.parse(userInfoFromLocalStorage) as UserInfo;
-  }
-  useAuthStore.setState(initialState);
-  useAuthStore.setState({ _hasHydrated: true });
-}
