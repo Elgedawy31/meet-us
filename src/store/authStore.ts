@@ -32,6 +32,7 @@ interface AuthState {
   setError: (error: string | null) => void;
   login: (data: Data) => Promise<void>;
   logout: () => void;
+  _hasHydrated: boolean;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -40,6 +41,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   userInfo: null,
   loading: false,
   error: null,
+  _hasHydrated: false,
   setToken: (token) => set({ token }),
   setRefreshToken: (refreshToken) => set({ refreshToken }),
   setUserInfo: (userInfo) => set({ userInfo }),
@@ -64,6 +66,33 @@ export const useAuthStore = create<AuthState>((set) => ({
       Cookies.set('token', res.data.token, { expires: 7 });
       Cookies.set('refresh', res.data.refresh, { expires: 30 }); // Refresh token typically has a longer expiry
       localStorage.setItem('userInfo', JSON.stringify(res.data.userInfo));
+
+      // Fetch user info
+      try {
+        const userInfoRes = await axios.get('https://api-yeshtery.dev.meetusvr.com/v1/user/info', {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${res.data.token}`,
+          },
+        });
+        set({ userInfo: userInfoRes.data as UserInfo });
+        localStorage.setItem('userInfo', JSON.stringify(userInfoRes.data));
+      } catch (userInfoError: unknown) {
+        console.error('An error occurred while fetching user info:', userInfoError);
+        let userInfoErrorMessage = 'Failed to fetch user information.';
+        if (axios.isAxiosError(userInfoError) && userInfoError.response?.data?.message) {
+          userInfoErrorMessage = userInfoError.response.data.message;
+        }
+        set({ error: userInfoErrorMessage });
+        toast.error(userInfoErrorMessage);
+        // Clear tokens and user info if fetching user info fails
+        Cookies.remove('token');
+        Cookies.remove('refresh');
+        localStorage.removeItem('userInfo');
+        set({ token: null, refreshToken: null, userInfo: null });
+        throw userInfoError; // Re-throw to propagate the error
+      }
+      
       toast.success('Login successful!');
     } catch (error: unknown) {
       console.error('An error occurred while logging in:', error);
@@ -106,4 +135,5 @@ if (typeof window !== 'undefined') {
     initialState.userInfo = JSON.parse(userInfoFromLocalStorage) as UserInfo;
   }
   useAuthStore.setState(initialState);
+  useAuthStore.setState({ _hasHydrated: true });
 }

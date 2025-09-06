@@ -1,5 +1,5 @@
 import React from 'react';
-import { MailCheck, Lock, Loader2 } from 'lucide-react';
+import { MailCheck, Lock, Loader } from 'lucide-react';
 import Link from 'next/link';
 import { Toaster } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
@@ -57,7 +57,7 @@ const LoginForm = () => {
         className="w-full flex items-center justify-center mt-4 bg-[#9414FF] hover:bg-purple-700 cursor-pointer text-white py-2 rounded-lg transition disabled:opacity-50"
         disabled={Object.keys(errors).length > 0 || loading}
       >
-        {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+        {loading ? <Loader className="mr-2 h-4 w-4 animate-spin" /> : null}
         Login
       </button>
 
