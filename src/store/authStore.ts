@@ -25,9 +25,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         isEmployee: true,
       });
 
-      console.log('====================================');
       console.log(res.data);
-      console.log('====================================');
 
       set({ token: res.data.token });
       Cookies.set('token', res.data.token, { expires: 7 });

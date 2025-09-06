@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../store/authStore';
-import { Lock, Mail, MailCheck } from 'lucide-react';
+import { Lock, MailCheck } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -87,26 +87,22 @@ const LoginPage = () => {
       </div>
 
       {/* Right Side - Logo */}
-      <div className="flex flex-col justify-center items-center w-3/5 bg-gradient-to-b from-purple-100 to-purple-200">
-        <div className="relative w-full h-1/2">
+      <div className="flex flex-col relative justify-center items-center w-3/5 bg-gradient-to-b from-purple-100 to-purple-200">
         <Image 
-                  src="/9e4298a54af78a8be9b2851a140ca8232f42ded4.png" 
-                  alt="image" 
-                  width={600} 
-                  height={288} 
-                  className=' object-cover absolute inset-0 m-auto -rotate-20'
-        />
-        <Image 
-          src="/b74714317592c3c8176c99baddf62febe0e276d0.png" 
+          src="/meet-us-logo.png" 
           alt="image" 
-          width={700} 
-          height={700} 
-          className=' object-cover absolute inset-0 m-auto scale-200 -rotate-20'
+          className="absolute  w-full h-screen"
+          width={744}
+          height={723}
           />
-        </div>
-        <div className="w-full h-1/4 flex items-start justify-center">
-        <Image src="/9039681aa3afd99677ad4b38d7a998cc976b0092.png" alt='text image' width={413} height={75}/>
-        </div>
+          <Image
+           src="/meet-text.svg" 
+           alt="image" 
+          className="relative top-36"
+
+           width={413} 
+           height={75} 
+         />
       </div>
     </div>
   );
