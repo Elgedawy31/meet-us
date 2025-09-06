@@ -30,9 +30,9 @@ const LoginPage = () => {
   };
   
  return (
-    <div className="min-h-screen bg-[#E9ECF2] flex overflow-hidden">
+    <div className="min-h-screen  flex overflow-hidden  bg-[url('/login-bg.svg')] bg-cover bg-center">
       {/* Left Side - Form */}
-      <div className="flex flex-col justify-center items-center w-2/5 bg-gradient-to-b from-white to-purple-100 p-10 border-r border-purple-300">
+      <div className="flex flex-col justify-center items-center w-2/5 ">
         <div className="w-full text-center max-w-sm space-y-9">
           <div className="">
           <h1 className="text-[56px] text-black leading-[120%] mb-2">Welcome back</h1>
@@ -87,7 +87,7 @@ const LoginPage = () => {
       </div>
 
       {/* Right Side - Logo */}
-      <div className="flex flex-col relative justify-center items-center w-3/5 bg-gradient-to-b from-purple-100 to-purple-200">
+      <div className="flex flex-col relative justify-center items-center w-3/5">
         <Image 
           src="/meet-us-logo.png" 
           alt="image" 
