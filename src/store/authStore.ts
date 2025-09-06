@@ -54,9 +54,13 @@ export const useAuthStore = create<AuthState>((set) => ({
       const res = await axios.post('/api/login', data);
   
       if (res.data.success) {
-        const { userInfo } = res.data;
-        set({ userInfo });
-        toast.success('Login successful!');
+        const userInfoRes = await axios.get('/api/user-info');
+        if (userInfoRes.data.success) {
+          set({ userInfo: userInfoRes.data.userInfo });
+          toast.success('Login successful!');
+        } else {
+          throw new Error(userInfoRes.data.message || 'Failed to fetch user info after login');
+        }
       } else {
         throw new Error(res.data.message || 'Login failed');
       }
@@ -80,7 +84,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ loading: true, error: null });
     try {
       await axios.post('/api/logout');
-      set({ token: null, refreshToken: null, userInfo: null });
+      set({ userInfo: null }); // Only clear userInfo
       toast.success('Logged out successfully!');
     } catch (error: unknown) {
       console.error('An error occurred during logout:', error);
@@ -100,19 +104,18 @@ export const useAuthStore = create<AuthState>((set) => ({
   
   // Hydrate token and userInfo from cookies/localStorage on client
   if (typeof window !== 'undefined') {
-    // Remove old cookie/localStorage hydration logic as tokens are now http-only
-    // Initial authentication check will be handled by a server-side component or a client-side fetch to /api/user-info
+    // Initial authentication check will be handled by a client-side fetch to /api/user-info
     const initializeAuth = async () => {
       try {
         const res = await axios.get('/api/user-info');
         if (res.data.success) {
           useAuthStore.setState({ userInfo: res.data.userInfo, _hasHydrated: true });
         } else {
-          useAuthStore.setState({ _hasHydrated: true });
+          useAuthStore.setState({ userInfo: null, _hasHydrated: true });
         }
       } catch (error) {
         console.error('Failed to fetch user info during hydration:', error);
-        useAuthStore.setState({ _hasHydrated: true });
+        useAuthStore.setState({ userInfo: null, _hasHydrated: true });
       }
     };
     initializeAuth();
